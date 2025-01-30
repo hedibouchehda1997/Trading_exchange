@@ -1,74 +1,55 @@
 #pragma once 
 
-#include <iostream>  
+#include <iostream> 
 #include <vector> 
-#include <atomic>
+#include <atomic> 
+
+#include "macros.h" 
 
 namespace Common {
-    template<typename T>
-    class MemPool final 
-    {
+    template<typename T> 
+    class LockFreeQueue final {
         public : 
+            LockFreeQueue(std::size_t numElems) : 
+                store_.assing(numElems) {} 
 
-        explicit MemPool(size_t numElems) 
-        {
-            store_.assign(numElems,ObjectBlock()) ;  
-        }
+            auto getNextToWriteTo() noexcept -> T* {
+                return &store_[new_write_index_] ;  
+            }
+            
+            auto updatWriteIndex() noexcept -> void {
+                new_write_index_ = (new_write_index_+1) % store_.size() ;  
+                num_elems_++ ; 
+            }
+            
+            auto getNextToRead() noexcept -> const T* {
+                return (size() ? &store_[next_read_index_] : nullptr) 
+            }
 
-        template<typename... Args> 
-        T* allocate(Args... args) noexcept 
-        {
-            auto obj_block = &(store_[next_free_index_]) ;  
-            ASSERT(obj_block->is_free_ , "Expected free ObjectBlock at index: "+ std::string(next_free_index_)) ;  
-            T* ret = &(obj_block->object_) ;   
-            ret = new(ret) T(args ...) ;  
-            obj_block->is_free = false ;  
+            auto updateReadIndex() noexcept -> void {
+                next_read_index_ = (next_read_index_+1) % store_.size() ;  
+                ASSERT(num_elems_ != 0 , "Read an invalid relement in "+ std::to_string(std::pthread_self())) ; 
+                num_elems_-- ; 
+            } 
+            
+            auto size() noexcept -> const size_t {
+                return num_elems_.load() ; 
+            }
 
+            LockFreeQueue(const LockFreeQueue&) = delete ; 
+            LockFreeQueue(const LockFreeQueue&&) = delete ;  
+            
+            LockFreeQueue& operator=(const LockFreeQueue&) = delete ;  
+            LockFreeQueue& operator=(const LockFreeQueue&&) = delete ;  
 
-            updateNextFreeIndex(); 
-
-            return ret ;  
-        }
-
-        auto deallocate(const T* elem) noexcept 
-        {
-            const auto elem_index = (reinterpret_cast<const ObjectBlock*>(elem) - &store_[0]) ;  
-            ASSERT(elem_index >= 0 && static_cast<size_t>(elem_index) < store_.size(), "Element being deallocated is not in the memory pool ") ; 
-            ASSERT(!store_[elem_index].is_free_,"Expected in use ObjectBlock at index "+std::to_string(elem_index))  ;  
-            store_[elem_index].is_free_ = true ; 
-        }
-
-        MemPool() = delete ; 
-        MemPool(const MemPool&) = delete ;  
-        MemPool(const MemPool&&) = delete ;  
-        MemPool &operator=(const MemPool &) = delete ;  
-        MemPool &operator=(const MemPool &&) = delete ;  
 
 
         private : 
+            std::vector<T> store_ ; 
 
-        auto  updateNextFreeIndex() noexcept 
-        {
-            const auto initial_free_index = next_free_index_ ;  
-            while(!store_[next_free_index_].is_free) 
-            {
-                next_free_index_++ ;  
-                if (UNLIKELY(next_free_index_ == store_.size())) 
-                {
-                    next_free_index_ = 0 ; 
-                }
-                if (UNLIKELY(initial_free_index == next_free_index_)) 
-                {
-                    ASSERT(initial_free_index != next_free_index_, "MemoryPool out of space ") ;  
-                }
-            }
-        }
-        struct ObjectBlock {
-            T object_ ;  
-            bool is_free_ = true ; 
-        } ;  
+            std::atomic<size_t> new_write_index_ = {0} ; 
+            std::atomic<size_t> next_read_index_ = {0} ; 
 
-        std::vector<ObjectBlock> store_ ;  
-        size_t next_free_index_ = 0 ; 
-    } ; 
+            std::atomic<size_t> num_elems_ = {0} ; 
+    }; 
 }
