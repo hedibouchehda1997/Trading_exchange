@@ -14,7 +14,7 @@ namespace Common {
 
         explicit MemPool(size_t numElems) 
         {
-            store_(numElems,{T(),true}) ;  
+            store_.assign(numElems,ObjectBlock()) ;  
         }
 
         template<typename... Args> 
@@ -36,7 +36,7 @@ namespace Common {
         {
             const auto elem_index = (reinterpret_cast<const ObjectBlock*>(elem) - &store_[0]) ;  
             ASSERT(elem_index >= 0 && static_cast<size_t>(elem_index) < store_.size(), "Element being deallocated is not in the memory pool ") ; 
-            ASSERT(!store_[elem_index].is_free_,"Expected in use ObjectBlock at index "+std:to_string(elem_index))  ;  
+            ASSERT(!store_[elem_index].is_free_,"Expected in use ObjectBlock at index "+std::to_string(elem_index))  ;  
             store_[elem_index].is_free_ = true ; 
         }
 

@@ -1,21 +1,21 @@
-#pragma once 
+
+#include <iostream>
 
 #include <iostream> 
 #include <atomic> 
 #include <thread> 
 #include <unistd.h> 
+#include <chrono>
 
 #include <sys/syscall.h>
 
 
-
-
 namespace Common {
-    inline auto setThreadCore(int core_id) noexcept  {
+    inline auto setThreadCore(int core_id)  noexcept -> bool {
         cpu_set_t cpuset ;  
 
         CPU_ZERO(&cpuset) ;  
-        CPU_SET(&cpuset) ;  
+  
 
         CPU_SET(core_id,&cpuset) ;
 
@@ -23,7 +23,7 @@ namespace Common {
     } 
 
     template<typename T, typename...A> 
-    inline auto createAndStartThread(int core_id, const std::string& name, T &&func, A && ... args) noexcept 
+    inline auto createAndStartThread(int core_id, const std::string& name, T &&func, A && ... args) noexcept -> std::thread*
     {
         auto t = new std::thread([&]() {
             if (core_id >= 0 && !setThreadCore(core_id)) {
@@ -32,16 +32,17 @@ namespace Common {
             }
 
             
-        std::cerr<<" Set core affinity for "<<name<< " "<< pthread_self()<<" to "<<core_id<<stdd::endl ;  
+        std::cerr<<" Set core affinity for "<<name<< " "<< pthread_self()<<" to "<<core_id<<std::endl ;  
 
 
         std::forward<T> (func) ((std::forward<A>(args)) ...) ; 
         }) ;    
 
 
-        using namespace std::literals::chrono_literals ; 
-        std::this_thread::sleep_for(1s) ; 
+        
+        std::this_thread::sleep_for(std::chrono::seconds(1)) ; 
 
         return t ; 
     }
 }
+
