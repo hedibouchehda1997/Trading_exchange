@@ -1,4 +1,6 @@
-#include "utils_threads.h" 
+#include "utils_threads.h"
+#include <iostream>
+
 
 
 auto randomFunction(int a, int b, bool sleep) 
@@ -10,7 +12,7 @@ auto randomFunction(int a, int b, bool sleep)
     if (sleep) 
     {
         using namespace std::literals::chrono_literals ;  
-        std::this_thread::sleep_for(5s) 
+        std::this_thread::sleep_for(5s)  ; 
     }
 
     std::cout<<" dummy function done "<<std::endl ; 
@@ -19,11 +21,10 @@ auto randomFunction(int a, int b, bool sleep)
 
 int main() 
 {
-    using namespace Common ;   
 
-    auto t1 = createAndStartThread(-1, "dummyfunction1" , randomFunction, 12,1,false) ; 
+    auto t1 = createAndStartThread(0, "dummyfunction1" , randomFunction, 12,1,false) ; 
 
-    auto t2 = createAndStartThread(-1, "dummyfunction2" , randomFunction, 1,1,true) ;   
+    auto t2 = createAndStartThread(0, "dummyfunction2" , randomFunction, 1,1,true) ;   
 
     std::cout<<"waiting for thread to finish executing "<<std::endl ;  
 
