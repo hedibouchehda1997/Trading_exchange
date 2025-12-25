@@ -9,8 +9,10 @@
 template<typename T> 
 class LockFreeQueue final {
     public : 
-        LockFreeQueue(std::size_t numElems) : 
-            store_.assing(numElems) {} 
+        LockFreeQueue(size_t numElems) 
+        {
+            store_.resize(numElems) ;
+        } 
 
         auto getNextToWriteTo() noexcept -> T* {
             return &store_[new_write_index_] ;  
@@ -22,12 +24,12 @@ class LockFreeQueue final {
         }
             
         auto getNextToRead() noexcept -> const T* {
-            return (size() ? &store_[next_read_index_] : nullptr) 
+            return (size() ? &store_[next_read_index_] : nullptr) ;
         }
 
         auto updateReadIndex() noexcept -> void {
             next_read_index_ = (next_read_index_+1) % store_.size() ;  
-            ASSERT(num_elems_ != 0 , "Read an invalid relement in "+ std::to_string(std::pthread_self())) ; 
+            ASSERT(num_elems_ != 0 , "Read an invalid relement in "+ std::to_string(pthread_self())) ; 
             num_elems_-- ; 
         } 
             

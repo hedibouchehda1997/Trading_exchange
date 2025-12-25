@@ -20,10 +20,10 @@ class MemPool final
     T* allocate(Args... args) noexcept 
     {
         auto obj_block = &(store_[next_free_index_]) ;  
-        ASSERT(obj_block->is_free_ , "Expected free ObjectBlock at index: "+ std::string(next_free_index_)) ;  
+        ASSERT(obj_block->is_free_ , "Expected free ObjectBlock at index: "+ std::to_string(next_free_index_)) ;  
         T* ret = &(obj_block->object_) ;   
         ret = new(ret) T(args ...) ;  
-        obj_block->is_free = false ;  
+        obj_block->is_free_ = false ;  
 
 
         updateNextFreeIndex(); 
@@ -50,7 +50,7 @@ class MemPool final
     auto  updateNextFreeIndex() noexcept 
     {
         const auto initial_free_index = next_free_index_ ;  
-        while(!store_[next_free_index_].is_free) 
+        while(!store_[next_free_index_].is_free_) 
         {
             next_free_index_++ ;  
             if (UNLIKELY(next_free_index_ == store_.size())) 

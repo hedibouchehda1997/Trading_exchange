@@ -1,6 +1,11 @@
-add_library(common INTERFACE)
+add_library(common STATIC)
+
+target_sources(common
+    PRIVATE
+        src/logging.cpp
+)
 
 target_include_directories(common
-    INTERFACE
+    PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
