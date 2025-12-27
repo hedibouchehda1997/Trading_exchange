@@ -3,6 +3,7 @@ add_library(common STATIC)
 target_sources(common
     PRIVATE
         src/logging.cpp
+        src/sockets.cpp
 )
 
 target_include_directories(common

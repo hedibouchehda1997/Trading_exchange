@@ -9,6 +9,22 @@ Logger::Logger(std::string file_name) : queue_(LOG_QUEUE_SIZE),file_name_(file_n
             }) ; 
             ASSERT(logger_thread_ != nullptr, "Failed to launch logger thread") ; 
 }
+
+Logger::~Logger() 
+{
+    std::cout<<"Flushing and closing Logger for "<<file_name_<<std::endl ; 
+
+    while (queue_.size()) 
+    {
+        using namespace std::literals::chrono_literals ;  
+        std::this_thread::sleep_for(1s) ; 
+    }
+
+    running_ = false ; 
+    file_.close() ; 
+}
+
+
 void Logger::flushQueue() noexcept
 {
     while (running_)

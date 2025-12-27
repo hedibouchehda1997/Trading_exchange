@@ -2,8 +2,8 @@
 #include "mem_pool.h"
 #include "lock_free_queue.h"
 #include <iostream>
-
-
+#include "logging.h"
+#include "sockets.h"
 
 
 auto randomFunction(int a, int b, bool sleep) 
@@ -43,7 +43,7 @@ auto consumeLockFreeQueue(LockFreeQueue<double>* lf_queue)
 
 int main() 
 {
-
+#if 0
 
     //testing the thread creation
     auto t1 = createAndStartThread(0, "dummyfunction1" , randomFunction, 12,1,false) ; 
@@ -91,9 +91,19 @@ int main()
 
 
     t_consumer->join() ; 
-    delete t_consumer ; 
+    delete t_consumer ;
+    
+    
+    //testing the logger  
+    std::string logger_path = "./logger_path.log" ;  
+    auto logger_tst = Logger(logger_path) ; 
 
+    logger_tst.pushValue(LogElement{LogType::CHAR,{.c='T'}}) ;
 
+#endif 
+
+    auto buff = getIfaceIP("lo") ;  
+    std::cout<<"buff "<<buff<<std::endl ; 
 
     return 0 ; 
 }
