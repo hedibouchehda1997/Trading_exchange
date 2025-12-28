@@ -3,6 +3,7 @@
 #include "lock_free_queue.h"
 #include <iostream>
 #include "logging.h"
+
 #include "sockets.h"
 
 
@@ -43,7 +44,6 @@ auto consumeLockFreeQueue(LockFreeQueue<double>* lf_queue)
 
 int main() 
 {
-#if 0
 
     //testing the thread creation
     auto t1 = createAndStartThread(0, "dummyfunction1" , randomFunction, 12,1,false) ; 
@@ -100,10 +100,7 @@ int main()
 
     logger_tst.pushValue(LogElement{LogType::CHAR,{.c='T'}}) ;
 
-#endif 
-
-    auto buff = getIfaceIP("lo") ;  
-    std::cout<<"buff "<<buff<<std::endl ; 
+    auto se = disableNagle(0) ; 
 
     return 0 ; 
 }
