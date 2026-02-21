@@ -29,6 +29,7 @@ inline std::string ClientRequestTypeToString(ClientRequestType type)
 }
 
 
+
 //the structure that information for a single order
 struct MEClientRequest 
 {
@@ -63,7 +64,6 @@ struct MEClientRequest
 typedef LockFreeQueue<MEClientRequest> MEClientRequestLFQueue ; 
 
 
-#pragma pack(push,1)
 enum class ClientResponseType 
 {
     INVALID=0,
@@ -134,3 +134,67 @@ struct MEClientResponse
     }
 
 } ; 
+
+
+enum class MarketUpdateType : uint8_t 
+{
+    INVALID = 0,
+    ADD = 1, 
+    MODIFY = 2, 
+    CANCEL = 3, 
+    TRADE = 4, 
+} ; 
+
+
+inline std::string MarketUpdateTypeToString(MarketUpdateType market_update_type) 
+{
+    switch(market_update_type) 
+    {
+        case MarketUpdateType::INVALID : 
+            return "INVALID" ; 
+        case MarketUpdateType::ADD : 
+            return "ADD" ; 
+        case MarketUpdateType::MODIFY : 
+            return "MODIFY" ; 
+        case MarketUpdateType::CANCEL : 
+            return "CANCEL" ; 
+        case MarketUpdateType::TRADE : 
+            return "TRADE" ; 
+    }
+    
+    return "UNKNOWN" ; 
+}
+
+struct MEMarketUpdate 
+{
+    MarketUpdateType type_ = MarketUpdateType::INVALID ; 
+
+    OrderId order_id_ = OrderId_INVALID; 
+    TickerId ticker_id_ = TickerId_INVALID ; 
+
+    Side side_ = Side::INVALID ;    
+    Price price_ = Price_INVALID ; 
+
+    Qty qty_ = Qty_INVALID; 
+    Priority priority_ = Priority_INVALID ; 
+
+
+    std::string ToString() 
+    {
+        std::stringstream ss ; 
+        ss<<"MEClientResponse "
+          <<" [ "
+          <<"type : "<<MarketUpdateTypeToString(type_) 
+          <<"ticker id : "<<tickerIdToString(ticker_id_) 
+          <<"order id "<<orderIdToString(order_id_) 
+          <<"side "<<sideToString(side_) 
+          <<"price_ "<<priceToString(price_) 
+          <<"qty "<<qtyToString(qty_) 
+          <<"priority "<<qtyToString(priority_) 
+          <<"]" ; 
+          return ss.str() ; 
+    }
+} ; 
+
+
+
