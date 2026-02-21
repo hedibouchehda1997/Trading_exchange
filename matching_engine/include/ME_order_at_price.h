@@ -32,3 +32,6 @@ struct MEOrderAtPrice
     }
 
 } ;
+
+
+typedef std::array<MEOrderAtPrice,ME_MAX_PRICE_LEVELS> OrdersAtPriceHashMap ; 
